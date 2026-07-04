@@ -19,13 +19,17 @@
 </head>
 <body>
     <header id="top-bar">
-        <div class="logo">🕳️ RabbitHole</div>
-        <div id="meta-info">
-            <span id="site-title">Preparing your jump...</span>
-            <span id="site-tags">Discovery</span>
-        </div>
+    <div class="logo">🕳️ RabbitHole</div>
+    <div id="meta-info">
+        <span id="site-title">Preparing your jump...</span>
+        <span id="site-tags">Discovery</span>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <button id="share-btn" onclick="copyCurrentLink()" style="background: #24273a; color: white; border: 1px solid #3b3f5c; padding: 10px 15px; font-size: 14px; font-weight: 600; border-radius: 6px; cursor: pointer;">📋 SHARE</button>
         <button id="jump-btn" onclick="diveDeep()">DIVE DEEPER</button>
-    </header>
+    </div>
+</header>
+
     <iframe id="viewer-frame" src=""></iframe>
     <script src="app.js"></script>
 </body>
