@@ -7,30 +7,53 @@
     <style>
         * { box-sizing: border-box; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0d0e15; color: #fff; overflow: hidden; }
-        #top-bar { height: 65px; background: #131520; border-bottom: 1px solid #24273a; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 10; position: relative; }
+        
+        #top-bar { height: 75px; background: #131520; border-bottom: 1px solid #24273a; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 10; position: relative; }
         .logo { font-size: 20px; font-weight: 800; background: linear-gradient(45deg, #ff007f, #7f00ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        #meta-info { text-align: center; max-width: 50%; }
-        #site-title { font-size: 15px; font-weight: 600; color: #e2e8f0; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        #site-tags { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; display: block; }
+        
+        #meta-info { text-align: center; max-width: 40%; }
+        #site-title { font-size: 14px; font-weight: 600; color: #e2e8f0; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* Category Navigation Bar Styling */
+        #category-bar { display: flex; gap: 8px; justify-content: center; margin-top: 6px; overflow-x: auto; max-width: 100%; padding-bottom: 2px; }
+        #category-bar::-webkit-scrollbar { display: none; } /* Hide scrollbar for clean look */
+        .cat-btn { background: #1e2235; color: #94a3b8; border: 1px solid #2e344f; padding: 4px 10px; font-size: 11px; font-weight: 600; border-radius: 20px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .cat-btn:hover { background: #2a304d; color: #fff; }
+        .cat-btn.active { background: linear-gradient(45deg, #ff007f, #7f00ff); color: white; border: none; box-shadow: 0 0 10px rgba(127, 0, 255, 0.4); }
+        
+        .btn-group { display: flex; gap: 10px; }
+        #share-btn { background: #24273a; color: white; border: 1px solid #3b3f5c; padding: 10px 15px; font-size: 14px; font-weight: 600; border-radius: 6px; cursor: pointer; }
         #jump-btn { background: #7f00ff; color: white; border: none; padding: 10px 20px; font-size: 14px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 0 15px rgba(127, 0, 255, 0.4); }
         #jump-btn:hover { background: #9d33ff; transform: translateY(-1px); box-shadow: 0 0 20px rgba(127, 0, 255, 0.6); }
-        #viewer-frame { width: 100%; height: calc(100% - 65px); border: none; background: #0d0e15; }
+        
+        #viewer-frame { width: 100%; height: calc(100% - 75px); border: none; background: #0d0e15; }
     </style>
 </head>
 <body>
+
     <header id="top-bar">
-    <div class="logo">🕳️ RabbitHole</div>
-    <div id="meta-info">
-        <span id="site-title">Preparing your jump...</span>
-        <span id="site-tags">Discovery</span>
-    </div>
-    <div style="display: flex; gap: 10px;">
-        <button id="share-btn" onclick="copyCurrentLink()" style="background: #24273a; color: white; border: 1px solid #3b3f5c; padding: 10px 15px; font-size: 14px; font-weight: 600; border-radius: 6px; cursor: pointer;">📋 SHARE</button>
-        <button id="jump-btn" onclick="diveDeep()">DIVE DEEPER</button>
-    </div>
-</header>
+        <div class="logo">🕳️ RabbitHole</div>
+        
+        <div id="meta-info">
+            <span id="site-title">Preparing your jump...</span>
+            <div id="category-bar">
+                <button class="cat-btn active" onclick="setCategory('ALL', this)">All</button>
+                <button class="cat-btn" onclick="setCategory('GAMES', this)">Games</button>
+                <button class="cat-btn" onclick="setCategory('SCIENCE', this)">Science</button>
+                <button class="cat-btn" onclick="setCategory('RETRO', this)">Retro</button>
+                <button class="cat-btn" onclick="setCategory('ART', this)">Art</button>
+                <button class="cat-btn" onclick="setCategory('UTILITIES', this)">Tools</button>
+            </div>
+        </div>
+        
+        <div class="btn-group">
+            <button id="share-btn" onclick="copyCurrentLink()">📋 SHARE</button>
+            <button id="jump-btn" onclick="diveDeep()">DIVE DEEPER</button>
+        </div>
+    </header>
 
     <iframe id="viewer-frame" src=""></iframe>
+
     <script src="app.js"></script>
 </body>
 </html>
