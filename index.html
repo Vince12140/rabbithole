@@ -1,70 +1,429 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RabbitHole // Web Discovery</title>
-    <style>
-        * { box-sizing: border-box; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0d0e15; color: #fff; overflow: hidden; }
-        
-        #top-bar { height: 75px; background: #131520; border-bottom: 1px solid #24273a; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 10; position: relative; }
-        .logo { font-size: 20px; font-weight: 800; background: linear-gradient(45deg, #ff007f, #7f00ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        #meta-info { text-align: center; max-width: 40%; }
-        #site-title { font-size: 14px; font-weight: 600; color: #e2e8f0; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        #category-bar { display: flex; gap: 8px; justify-content: center; margin-top: 6px; overflow-x: auto; max-width: 100%; padding-bottom: 2px; }
-        #category-bar::-webkit-scrollbar { display: none; }
-        .cat-btn { background: #1e2235; color: #94a3b8; border: 1px solid #2e344f; padding: 4px 10px; font-size: 11px; font-weight: 600; border-radius: 20px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
-        .cat-btn:hover { background: #2a304d; color: #fff; }
-        .cat-btn.active { background: linear-gradient(45deg, #ff007f, #7f00ff); color: white; border: none; box-shadow: 0 0 10px rgba(127, 0, 255, 0.4); }
-        
-        .btn-group { display: flex; gap: 10px; }
-        #share-btn { background: #24273a; color: white; border: 1px solid #3b3f5c; padding: 10px 15px; font-size: 14px; font-weight: 600; border-radius: 6px; cursor: pointer; }
-        #jump-btn { background: #7f00ff; color: white; border: none; padding: 10px 20px; font-size: 14px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 0 15px rgba(127, 0, 255, 0.4); }
-        #jump-btn:hover { background: #9d33ff; transform: translateY(-1px); box-shadow: 0 0 20px rgba(127, 0, 255, 0.6); }
-        
-        /* Layout logic resizing height automatically when fallback alerts activate */
-        #main-container { display: flex; flex-direction: column; width: 100%; height: calc(100% - 75px); }
-        #fallback-banner { display: none; background: #c62828; color: white; text-align: center; padding: 8px; font-size: 13px; font-weight: 600; justify-content: center; align-items: center; gap: 15px; border-bottom: 1px solid #d32f2f; }
-        #external-link-btn { background: white; color: #c62828; border: none; padding: 6px 12px; font-size: 12px; font-weight: 700; border-radius: 4px; cursor: pointer; transition: 0.2s; }
-        #external-link-btn:hover { background: #f5f5f5; }
-        #viewer-frame { width: 100%; flex-grow: 1; border: none; background: #0d0e15; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rabbithole Control Matrix</title>
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --panel: #121216;
+      --border: #22222a;
+      --accent: #00ff66;
+      --accent-dim: rgba(0, 255, 102, 0.15);
+      --text: #e1e1e6;
+      --text-muted: #888894;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    /* Layout System */
+    header {
+      padding: 30px 20px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #121216 0%, #0a0a0c 100%);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      margin: 5px 0 0 0;
+      font-size: 1rem;
+    }
+
+    .matrix-grid {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    @media (min-width: 768px) {
+      .matrix-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .matrix-card {
+      background-color: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 25px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    .card-title {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    /* Module 1: Interactive Canvas Background */
+    #canvas-container {
+      position: relative;
+      width: 100%;
+      height: 250px;
+      background: #000;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .canvas-hint {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Module 2: Synth Soundboard Grid */
+    .sound-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .sound-btn {
+      background: #1a1a22;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 20px 10px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .sound-btn:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    /* Module 3: Dev Conversion Tool */
+    .tool-box textarea {
+      width: 100%;
+      height: 100px;
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: #fff;
+      padding: 12px;
+      box-sizing: border-box;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: none;
+      outline: none;
+    }
+
+    .tool-box textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .action-row {
+      margin: 15px 0;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      background: #22222a;
+      border: 1px solid #333340;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .action-btn:hover {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    /* Module 4: Kanban Board System */
+    .kanban-board {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    .kanban-column {
+      background: #181820;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 15px;
+      min-height: 250px;
+    }
+
+    .column-header {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-bottom: 15px;
+      color: var(--text-muted);
+    }
+
+    .kanban-input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .kanban-input-row input {
+      flex-grow: 1;
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: #fff;
+      padding: 8px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .kanban-input-row input:focus {
+      border-color: var(--accent);
+    }
+
+    .add-task-btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task-card {
+      background: #252530;
+      border: 1px solid var(--border);
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .task-card:hover {
+      border-color: #555;
+    }
+
+    .task-actions button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0 4px;
+    }
+
+    .task-actions button:hover {
+      color: #ff3366;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
 </head>
 <body>
 
-    <header id="top-bar">
-        <div class="logo">🕳️ RabbitHole</div>
-        
-        <div id="meta-info">
-            <span id="site-title">Preparing your jump...</span>
-            <div id="category-bar">
-                <button class="cat-btn active" onclick="setCategory('ALL', this)">All</button>
-                <button class="cat-btn" onclick="setCategory('GAMES', this)">Games</button>
-                <button class="cat-btn" onclick="setCategory('SCIENCE', this)">Science</button>
-                <button class="cat-btn" onclick="setCategory('RETRO', this)">Retro</button>
-                <button class="cat-btn" onclick="setCategory('ART', this)">Art</button>
-                <button class="cat-btn" onclick="setCategory('UTILITIES', this)">Tools</button>
-            </div>
-        </div>
-        
-        <div class="btn-group">
-            <button id="share-btn" onclick="copyCurrentLink()">📋 SHARE</button>
-            <button id="jump-btn" onclick="diveDeep()">DIVE DEEPER</button>
-        </div>
-    </header>
+  <header>
+    <h1>Rabbithole Control Matrix</h1>
+    <p class="subtitle">Unified Client-Side Interaction Environment</p>
+  </header>
 
-    <div id="main-container">
-        <div id="fallback-banner">
-            <span>⚠️ Blank space? This website restricts playing inside frames.</span> 
-            <button id="external-link-btn" onclick="openLinkExternally()">OPEN IN NEW TAB ↗️</button>
-        </div>
-        <iframe id="viewer-frame" src=""></iframe>
-    </div>
+  <main class="matrix-grid">
 
-    <script src="app.js"></script>
+    <!-- 🟢 MODULE 1: LIQUID PARTICLE ENGINE -->
+    <section class="matrix-card">
+      <div class="card-title">✦ 01 // Interactive Fluid Matrix</div>
+      <div id="canvas-container">
+        <span class="canvas-hint">Drag or move mouse across chasm</span>
+        <canvas id="fluidCanvas"></canvas>
+      </div>
+    </section>
+
+    <!-- 🟢 MODULE 2: RETRO SYNTH SOUNDBOARD -->
+    <section class="matrix-card">
+      <div class="card-title">✦ 02 // Synth Frequency Matrix</div>
+      <div class="sound-grid">
+        <button class="sound-btn" onclick="playSynth(130.81, 'sawtooth', 0.4)">LOW</button>
+        <button class="sound-btn" onclick="playSynth(261.63, 'triangle', 0.3)">CORE</button>
+        <button class="sound-btn" onclick="playSynth(523.25, 'sine', 0.2)">HIGH</button>
+        <button class="sound-btn" onclick="playSynth(392.00, 'square', 0.15)">BEAM</button>
+        <button class="sound-btn" onclick="playSynth(196.00, 'sawtooth', 0.25)">DROP</button>
+        <button class="sound-btn" onclick="playSynth(880.00, 'sine', 0.1)">ECHO</button>
+      </div>
+    </section>
+
+    <!-- 🟢 MODULE 3: DEV TEXT UTILITIES -->
+    <section class="matrix-card">
+      <div class="card-title">✦ 03 // String Mutation Unit</div>
+      <div class="tool-box">
+        <textarea id="devText" placeholder="Enter text string to parse..."></textarea>
+        <div class="action-row">
+          <button class="action-btn" onclick="mutateText('upper')">UPPERCASE</button>
+          <button class="action-btn" onclick="mutateText('lower')">lowercase</button>
+          <button class="action-btn" onclick="mutateText('base64')">Base64 Enc</button>
+          <button class="action-btn" onclick="mutateText('clear')">Clear Buffer</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 🟢 MODULE 4: KANBAN WORKFLOW BUFFER -->
+    <section class="matrix-card">
+      <div class="card-title">✦ 04 // Local Storage Kanban</div>
+      <div class="kanban-input-row">
+        <input type="text" id="newTaskInput" placeholder="Add buffer log item...">
+        <button class="add-task-btn" onclick="addTask()">Add</button>
+      </div>
+      <div class="kanban-board">
+        <div class="kanban-column">
+          <div class="column-header">Active Logs</div>
+          <div id="todo-list" class="task-list"></div>
+        </div>
+        <div class="kanban-column">
+          <div class="column-header">Committed</div>
+          <div id="done-list" class="task-list"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>All operations sandboxed within durable client-side scope.</p>
+  </footer>
+
+  <!-- SCRIPT ARCHITECTURE -->
+  <script>
+    /* --- ENGINE 1: PARTICLE MATRIX --- */
+    const canvas = document.getElementById('fluidCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    const mouse = { x: null, y: null };
+
+    function resizeCanvas() {
+      const box = canvas.parentElement;
+      canvas.width = box.clientWidth;
+      canvas.height = box.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = Math.random() * 3 + 1;
+        this.speedX = Math.random() * 2 - 1;
+        this.speedY = Math.random() * 2 - 1;
+        this.color = `rgba(0, 255, 102, ${Math.random() * 0.6 + 0.2})`;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.size > 0.1) this.size -= 0.02;
+      }
+      draw() {
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    canvas.parentElement.addEventListener('mousemove', (e) => {
+      const bounds = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - bounds.left;
+      mouse.y = e.clientY - bounds.top;
+      for (let i = 0; i < 3; i++) {
+        particles.push(new Particle(mouse.x, mouse.y));
+      }
+    });
+
+    function animateParticles() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+
+        if (particles[i].size <= 0.1) {
+          particles.splice(i, 1);
+          i--;
+        }
+      }
+
+      requestAnimationFrame(animateParticles);
+    }
+
+    animateParticles();
+
+    /* --- ENGINE 2: AUDIO SYNTH SYNC --- */let audioCtx = null;function playSynth(freq, type, vol) {if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();const osc = audioCtx.createOscillator();const gain = audioCtx.createGain();osc.type = type;osc.frequency.setValueAtTime(freq, audioCtx.currentTime);gain.gain.setValueAtTime(vol, audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);osc.connect(gain);gain.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime + 0.5);}/* --- ENGINE 3: MUTATION LOGIC --- */function mutateText(mode) {const area = document.getElementById('devText');if (mode === 'upper') area.value = area.value.toUpperCase();if (mode === 'lower') area.value = area.value.toLowerCase();if (mode === 'base64') {try { area.value = btoa(area.value); }catch(e) { alert('String contains unencodable tracking tokens.'); }}if (mode === 'clear') area.value = '';}/* --- ENGINE 4: LOCALSTORAGE KANBAN --- */let dataBuffer = JSON.parse(localStorage.getItem('kanbanBuffer')) || [{ id: 1, text: 'Deploy main layout structure', status: 'todo' },{ id: 2, text: 'Sanitize asset registries', status: 'done' }];function saveBuffer() {localStorage.setItem('kanbanBuffer', JSON.stringify(dataBuffer));renderBoard();}function addTask() {const input = document.getElementById('newTaskInput');if (!input.value.trim()) return;dataBuffer.push({id: Date.now(),text: input.value.trim(),status: 'todo'});input.value = '';saveBuffer();}function toggleStatus(id) {dataBuffer = dataBuffer.map(task => {if (task.id === id) {task.status = task.status === 'todo' ? 'done' : 'todo';}return task;});saveBuffer();}function deleteTask(id, event) {event.stopPropagation();dataBuffer = dataBuffer.filter(task => task.id !== id);saveBuffer();}function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function renderBoard() {const todoList = document.getElementById('todo-list');const doneList = document.getElementById('done-list');todoList.innerHTML = '';doneList.innerHTML = '';dataBuffer.forEach(task => {const item = document.createElement('div');item.className = 'task-card';item.onclick = () => toggleStatus(task.id);item.innerHTML = `<span>${escapeHtml(task.text)}</span><div class="task-actions"><button type="button" onclick="deleteTask(${task.id}, event)" aria-label="Delete task">×</button></div>`;if (task.status === 'todo') todoList.appendChild(item);else doneList.appendChild(item);});}renderBoard();
+  </script>
 </body>
 </html>
-
