@@ -27,4 +27,17 @@ function diveDeep() {
     document.getElementById('site-tags').innerText = activePortal.tags;
 }
 
+function copyCurrentLink() {
+    const currentIframeSrc = document.getElementById('viewer-frame').src;
+    if (!currentIframeSrc) return;
+    
+    navigator.clipboard.writeText(currentIframeSrc).then(() => {
+        const shareBtn = document.getElementById('share-btn');
+        shareBtn.innerText = "✅ COPIED!";
+        setTimeout(() => { shareBtn.innerText = "📋 SHARE"; }, 2000);
+    }).catch(err => {
+        console.error('Could not copy text: ', err);
+    });
+}
+
 window.onload = bootstrap;
