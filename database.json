@@ -81,5 +81,23 @@
   { "url": "https://destructoid.com", "title": "Destructoid Enthusiast Video Game Portal", "tags": "Gaming, Reviews" },
   { "url": "https://eurogamer.net", "title": "Eurogamer European Console & PC Analysis", "tags": "Gaming, News" },
   { "url": "https://rockpapershotgun.com", "title": "Rock Paper Shotgun Specialized PC Gaming Log", "tags": "Gaming, PC" },
+  { "url": "https://pcgamer.com", "title": "PC Gamer Elite Hardware & Software Testing", "tags": "Gaming, Hardware" },
+  { "url": "https://gameinformer.com", "title": "Game Informer Legacy Magazine Hub", "tags": "Nostalgia, Gaming" },
+  { "url": "https://gamasutra.com", "title": "Gamasutra Professional Game Industry Logic", "tags": "Tech, Engineering" },
+  { "url": "https://gamedev.net", "title": "GameDev.net Programmer Support Forums", "tags": "Tech, Code" },
+  { "url": "https://indiedb.com", "title": "IndieDB Independent Game Progress Tracking", "tags": "Gaming, Indie" },
+  { "url": "https://moddb.com", "title": "ModDB Modding Infrastructure & Assets", "tags": "Gaming, Retro" },
+  { "url": "https://nexusmods.com", "title": "Nexus Mods PC Community Modification Vault", "tags": "Gaming, Tools" },
+  { "url": "https://curseforge.com", "title": "CurseForge Modpack Installation Core", "tags": "Gaming, Utilities" },
+  { "url": "https://steamdb.info", "title": "SteamDB Live Metric Price History Analytic", "tags": "Utilities, Pricing" },
+  { "url": "https://gog.com", "title": "GOG DRM-Free Classic Digital Distribution", "tags": "Gaming, Shopping" },
+  { "url": "https://humblebundle.com", "title": "Humble Bundle Charitable Digital Packager", "tags": "Shopping, Charity" },
+  { "url": "https://itch.io", "title": "Itch.io Creative Open Video Game Market", "tags": "Gaming, Indie" },
+  { "url": "https://gamejolt.com", "title": "Game Jolt Next-Gen Gaming Community", "tags": "Gaming, Social" },
+  { "url": "https://newgrounds.com", "title": "Newgrounds Historic Flash Animation Kingdom", "tags": "Nostalgia, Art" },
+  { "url": "https://kongregate.com", "title": "Kongregate Browser Gaming Portal", "tags": "Games, Retro" },
+  { "url": "https://armorgames.com", "title": "Armor Games Curated Desktop Strategy Arcade", "tags": "Games, Nostalgia" },
+  { "url": "https://addictinggames.com", "title": "Addicting Games Flash Era Legend Directory", "tags": "Games, Nostalgia" },
+  { "url": "https://miniclip.com", "title": "Miniclip Worldwide Browser Mini Game Base", "tags": "Games, Nostalgia" }
 
 
