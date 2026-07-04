@@ -1,22 +1,53 @@
 [
   {
-    "url": "https://chromeexperiments.com",
-    "title": "100,000 Stars Interactive Galaxy",
-    "tags": "Science, Space"
+    "url": "https://checkboxrace.com",
+    "title": "Checkbox Race: Speed Check Competition",
+    "tags": "Games, Mini"
   },
   {
-    "url": "https://withgoogle.com",
-    "title": "Quick, Draw! Neural Network Game",
-    "tags": "Games, AI"
+    "url": "https://sandspiel.club",
+    "title": "Sandspiel Falling Sand Physics Sandbox",
+    "tags": "Creative, Physics"
   },
   {
-    "url": "https://vectorizer.com",
-    "title": "Free Raster to Vector Converter",
-    "tags": "Design, Utilities"
+    "url": "https://pointerpointer.com",
+    "title": "Pointer Pointer: Finding Your Mouse",
+    "tags": "Weird, Fun"
   },
   {
-    "url": "https://linerider.com",
-    "title": "Line Rider Classic Browser Game",
-    "tags": "Nostalgia, Games"
+    "url": "https://slowroads.io",
+    "title": "Slow Roads Endless Driving Browser Game",
+    "tags": "Games, Relaxation"
+  },
+  {
+    "url": "https://spaceengineers.io",
+    "title": "Procedural Planet Surface Generator",
+    "tags": "Space, Tech"
+  },
+  {
+    "url": "https://adultswim.com",
+    "title": "Elastic Man Interactive Face Physics",
+    "tags": "Weird, Art"
+  },
+  {
+    "url": "https://neal.fun",
+    "title": "The Password Game: Frustrating Challenge",
+    "tags": "Games, Viral"
+  },
+  {
+    "url": "https://js.org",
+    "title": "Classic MS Paint Browser Emulator",
+    "tags": "Nostalgia, Utilities"
+  },
+  {
+    "url": "https://radio.garden",
+    "title": "Radio Garden Live Global Radio Map",
+    "tags": "Music, Exploration"
+  },
+  {
+    "url": "https://blobopera.com",
+    "title": "Blob Opera Machine Learning Music",
+    "tags": "AI, Audio"
   }
 ]
+
