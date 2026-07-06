@@ -1,385 +1,335 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rabbithole Control Matrix // Flight Subsystem</title>
-<!-- Leaflet Maps Core Pipeline Embedded -->
-<link rel="stylesheet" href="https://unpkg.com" />
-<script src="https://unpkg.com"></script>
-<style>
+Here is the raw code in a plain-text format without the code box styling. You can highlight and copy it directly:
+
+
+
+
+
+Rabbithole Control Matrix // Flight Subsystem
+
+
 :root {
-  --bg-main: #0a0b10;
-  --panel-bg: #11131f;
-  --border-line: rgba(255, 255, 255, 0.08);
-  --neon-green: #00ff66;
-  --neon-cyan: #00d5ff;
-  --text-main: #f5f7ff;
-  --text-muted: #9ba4b8;
-  --panel-radius: 12px;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --font-sans: Inter, system-ui, -apple-system, sans-serif;
+--bg-main: #0a0b10;
+--panel-bg: #11131f;
+--border-line: rgba(255, 255, 255, 0.08);
+--neon-green: #00ff66;
+--neon-cyan: #00d5ff;
+--text-main: #f5f7ff;
+--text-muted: #9ba4b8;
+--panel-radius: 12px;
+--font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+--font-sans: Inter, system-ui, -apple-system, sans-serif;
 }
+
 * { box-sizing: border-box; }
 body {
-  margin: 0; min-height: 100vh; color: var(--text-main); font-family: var(--font-sans);
-  background-color: var(--bg-main); overflow-x: hidden; padding: 40px 0;
+margin: 0; min-height: 100vh; color: var(--text-main); font-family: var(--font-sans);
+background-color: var(--bg-main); overflow-x: hidden; padding: 40px 0;
 }
 .app-container { width: min(1440px, calc(100% - 40px)); margin: auto; }
 h1 { text-align: center; font-size: 38px; margin: 0 0 8px; letter-spacing: -0.02em; font-weight: 800; }
 .subtitle { text-align: center; color: var(--text-muted); font-size: 14px; margin-bottom: 48px; font-family: var(--font-mono); }
 .grid-layout { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; }
 .card {
-  grid-column: span 6; background-color: var(--panel-bg); border: 1px solid var(--border-line);
-  border-radius: var(--panel-radius); padding: 24px; display: flex; flex-direction: column;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+grid-column: span 6; background-color: var(--panel-bg); border: 1px solid var(--border-line);
+border-radius: var(--panel-radius); padding: 24px; display: flex; flex-direction: column;
+box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
 }
 @media(max-width: 980px) { .card { grid-column: span 12; } }
 .card-title {
-  margin: 0 0 20px; font-size: 14px; font-family: var(--font-mono); color: var(--neon-green);
-  text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px;
+margin: 0 0 20px; font-size: 14px; font-family: var(--font-mono); color: var(--neon-green);
+text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px;
 }
 .view-viewport {
-  height: 280px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);
-  background: #000; position: relative; overflow: hidden; flex-grow: 1;
+height: 280px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);
+background: #000; position: relative; overflow: hidden; flex-grow: 1;
 }
 #flightMapMatrix { width: 100%; height: 100%; z-index: 1; }
 .telemetry-hint {
-  position: absolute; left: 12px; bottom: 12px; font-family: var(--font-mono); font-size: 11px;
-  color: var(--text-muted); z-index: 1000; background: rgba(17, 19, 31, 0.9);
-  padding: 6px 12px; border-radius: 4px; border: 1px solid var(--border-line); pointer-events: none;
+position: absolute; left: 12px; bottom: 12px; font-family: var(--font-mono); font-size: 11px;
+color: var(--text-muted); z-index: 1000; background: rgba(17, 19, 31, 0.9);
+padding: 6px 12px; border-radius: 4px; border: 1px solid var(--border-line); pointer-events: none;
 }
 .synth-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; flex-grow: 1; }
 .matrix-trigger {
-  background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-line); border-radius: 6px;
-  color: var(--text-main); font-family: var(--font-mono); font-size: 11px; font-weight: 700;
-  cursor: pointer; transition: all 0.15s; text-transform: uppercase; min-height: 64px;
+background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-line); border-radius: 6px;
+color: var(--text-main); font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+cursor: pointer; transition: all 0.15s; text-transform: uppercase; min-height: 64px;
 }
 .matrix-trigger:hover, .matrix-trigger.active {
-  border-color: var(--neon-green); color: var(--neon-green); background: rgba(0, 255, 102, 0.04);
+border-color: var(--neon-green); color: var(--neon-green); background: rgba(0, 255, 102, 0.04);
 }
 textarea, input {
-  width: 100%; border: 1px solid var(--border-line); background: rgba(0, 0, 0, 0.25);
-  color: var(--text-main); border-radius: 6px; padding: 12px; font-family: var(--font-mono);
-  font-size: 13px; outline: none;
+width: 100%; border: 1px solid var(--border-line); background: rgba(0, 0, 0, 0.25);
+color: var(--text-main); border-radius: 6px; padding: 12px; font-family: var(--font-mono);
+font-size: 13px; outline: none;
 }
 textarea { min-height: 140px; resize: none; flex-grow: 1; color: var(--neon-cyan); line-height: 1.5; }
 .control-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
 .action-node {
-  border: 1px solid var(--border-line); background: rgba(255, 255, 255, 0.04);
-  color: var(--text-main); border-radius: 6px; padding: 10px 16px; font-family: var(--font-mono);
-  font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s;
+border: 1px solid var(--border-line); background: rgba(255, 255, 255, 0.04);
+color: var(--text-main); border-radius: 6px; padding: 10px 16px; font-family: var(--font-mono);
+font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s;
 }
 .action-node:hover {
-  background: var(--neon-green); color: #0a0b10; border-color: var(--neon-green);
+background: var(--neon-green); color: #0a0b10; border-color: var(--neon-green);
 }
 .action-node.commit-btn { background: var(--neon-green); color: #0a0b10; border: none; }
 .kanban-layout { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px; }
 .sub-column {
-  min-height: 140px; background: rgba(0, 0, 0, 0.15); border: 1px solid var(--border-line);
-  border-radius: 8px; padding: 12px;
+min-height: 140px; background: rgba(0, 0, 0, 0.15); border: 1px solid var(--border-line);
+border-radius: 8px; padding: 12px;
 }
 .column-header {
-  font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);
-  text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em;
+font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);
+text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em;
 }
 .logged-task {
-  border: 1px solid var(--border-line); background: rgba(255, 255, 255, 0.02);
-  border-radius: 6px; padding: 10px; margin-bottom: 8px; display: flex;
-  justify-content: space-between; align-items: center; font-size: 12px; font-family: var(--font-mono);
+border: 1px solid var(--border-line); background: rgba(255, 255, 255, 0.02);
+border-radius: 6px; padding: 10px; margin-bottom: 8px; display: flex;
+justify-content: space-between; align-items: center; font-size: 12px; font-family: var(--font-mono);
 }
 .logged-task button { background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; }
-/* Clean map architecture layout overrides */
 .leaflet-container { background: #000 !important; }
 .custom-drone-pointer { display: flex !important; justify-content: center; align-items: center; background: none !important; border: none !important; }
-</style>
-</head>
-<body>
 
-<div class="app-container">
-  <h1>Rabbithole Control Matrix</h1>
-  <div class="subtitle">Unified Client-Side Interaction Environment</div>
 
-  <div class="grid-layout">
-    <!-- MODULE 01: REAL EARTH MAP DRONE SIMULATOR -->
-    <article class="card">
-      <h2 class="card-title">✦ 01 // Drone Spatial Matrix</h2>
-      <div class="view-viewport">
-        <div id="flightMapMatrix"></div>
-        <div class="telemetry-hint" id="telemetryOutput">HDG: 0° | ALT: 120FT | SPD: 0.00 | LOC: JFK Target</div>
-      </div>
-      <div class="control-row">
-        <button class="action-node" onclick="teleportDrone(40.6413, -73.7781, 'JFK Airport Runway')">JFK Hub</button>
-        <button class="action-node" onclick="teleportDrone(37.6213, -122.3790, 'SFO Trans-Bay Grid')">SFO Core</button>
-        <button class="action-node" onclick="teleportDrone(35.7720, 140.3929, 'Tokyo Narita Sector')">Narita Terminal</button>
-      </div>
-    </article>
 
-    <!-- MODULE 02: SYNTH OSCILLATOR LAB -->
-    <article class="card">
-      <h2 class="card-title">✦ 02 // Synth Frequency Matrix</h2>
-      <div class="synth-layout">
-        <button class="matrix-trigger" data-f="65.41" data-w="sawtooth">Low Sub</button>
-        <button class="matrix-trigger" data-f="110.00" data-w="sawtooth">Core Low</button>
-        <button class="matrix-trigger" data-f="220.00" data-w="triangle">Balanced</button>
-        <button class="matrix-trigger" data-f="440.00" data-w="sine">High Beam</button>
-        <button class="matrix-trigger" data-f="880.00" data-w="sine">Echo Out</button>
-        <button class="matrix-trigger" id="droneNodeToggle" onclick="toggleEngineDrone()">Engine Hum</button>
-      </div>
-    </article>
 
-    <!-- MODULE 03: CRYPT DATA PARSER -->
-    <article class="card">
-      <h2 class="card-title">✦ 03 // String Mutation Unit</h2>
-      <textarea id="txt" placeholder="Enter text string to parse..."></textarea>
-      <div class="control-row">
-        <button class="action-node" onclick="mutateData('upper')">UPPERCASE</button>
-        <button class="action-node" onclick="mutateData('lower')">lowercase</button>
-        <button class="action-node" onclick="mutateData('b64')">Base64 Enc</button>
-        <button class="action-node" onclick="mutateData('oracle')">Prophecy Seed</button>
-        <button class="action-node" onclick="mutateData('clear')">Clear Buffer</button>
-      </div>
-    </article>
+Rabbithole Control Matrix
+Unified Client-Side Interaction Environment
 
-    <!-- MODULE 04: STORAGE DIRECTIVE BOARD -->
-    <article class="card">
-      <h2 class="card-title">✦ 04 // Local Storage Kanban</h2>
-      <div style="display: flex; gap: 10px;">
-        <input id="newTask" placeholder="Add buffer log item...">
-        <button class="action-node commit-btn" onclick="addNewDirective()">Add</button>
-      </div>
-      <div class="kanban-layout">
-        <div class="sub-column">
-          <div class="column-header">Active Logs</div>
-          <div class="list-container" id="todo"></div>
-        </div>
-        <div class="sub-column">
-          <div class="column-header">Committed</div>
-          <div class="list-container" id="done"></div>
-        </div>
-      </div>
-    </article>
-  </div>
-</div>
 
-<script>
+✦ 01 // Drone Spatial Matrix
+
+
+HDG: 0° | ALT: 120FT | SPD: 0.00 | LOC: JFK Target
+
+
+JFK Hub
+SFO Core
+Narita Terminal
+
+
+✦ 02 // Synth Frequency Matrix
+
+Low Sub
+Core Low
+Balanced
+High Beam
+Echo Out
+Engine Hum
+
+
+✦ 03 // String Mutation Unit
+
+
+UPPERCASE
+lowercase
+Base64 Enc
+Prophecy Seed
+Clear Buffer
+
+
+✦ 04 // Local Storage Kanban
+
+
+Add
+
+
+
+Active Logs
+
+
+
+Committed
+
+
+
+
+
+
 const $ = id => document.getElementById(id);
-
-// --- SPATIAL MAP FLIGHT SIMULATOR MOTOR ENGINE ---
 let coreMap, vehicleMarker, traceLine;
 let simulationState = {
-  lat: 40.6413,      // Starting position matching your snapshot history
-  lng: -73.7781,
-  heading: 0,        // Heading angles computed in degrees
-  speed: 0.0015,     // Delta trajectory velocity coefficient
-  altitude: 120
+lat: 40.6413,
+lng: -73.7781,
+heading: 0,
+speed: 0.0015,
+altitude: 120
 };
-
 function initSpatialSimulator() {
-  // Spawn leaflet container inside target module grid viewport
-  coreMap = L.map('flightMapMatrix', {
-    center: [simulationState.lat, simulationState.lng],
-    zoom: 14,
-    zoomControl: false,
-    attributionControl: false
-  });
-
-  // Stitch dark, high-utility tile maps matching the control interface
-  L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
-    maxZoom: 19
-  }).addTo(coreMap);
-
-  // Construct customized inline SVG drone symbol pointing up
-  const vehicleIcon = L.divIcon({
-    className: 'custom-drone-pointer',
-    html: `<svg id="droneSvgIcon" viewBox="0 0 24 24" width="26" height="28" style="transform: rotate(0deg); transition: transform 0.05s linear;">
-             <path d="M12,2L2,22L12,17L22,22L12,2Z" fill="#00ff66" stroke="#11131f" stroke-width="2"/>
-           </svg>`,
-    iconSize: [26, 28]
-  });
-
-  vehicleMarker = L.marker([simulationState.lat, simulationState.lng], {icon: vehicleIcon}).addTo(coreMap);
-  traceLine = L.polyline([], {color: '#00d5ff', weight: 2, opacity: 0.7}).addTo(coreMap);
-
-  // Inject operational input tracking hook parameters
-  window.addEventListener('keydown', processNavigationalInputs);
-  
-  // Activate the coordinate update frame chain loop
-  requestAnimationFrame(computeFlightPhysics);
-}
-
-function processNavigationalInputs(e) {
-  const code = e.key.toLowerCase();
-  
-  if (code === 'a') {
-    simulationState.heading -= 8;
-    fireAudioImpulse(130, 'triangle'); // Left tracking pulse
-  }
-  if (code === 'd') {
-  simulationState.lng += simulationState.speed * Math.cos(angleRad) * 0.15;
-
-  simulationState.altitude = Math.round(110 + (simulationState.speed * 25000) + Math.sin(Date.now() / 400) * 3);
-
-  const calculatedCoordinates = [simulationState.lat, simulationState.lng];
-  vehicleMarker.setLatLng(calculatedCoordinates);
-
-  const svgTarget = $("droneSvgIcon");
-  if (svgTarget) {
-    svgTarget.style.transform = `rotate(${simulationState.heading}deg)`;
-  }
-
-  coreMap.panTo(calculatedCoordinates, {animate: false});
-
-  const trajectoryBuffer = traceLine.getLatLngs();
-  trajectoryBuffer.push(calculatedCoordinates);
-  if (trajectoryBuffer.length > 80) trajectoryBuffer.shift();
-  traceLine.setLatLngs(trajectoryBuffer);
-
-  $('telemetryOutput').textContent = `HDG: ${(simulationState.heading % 360 + 360) % 360}° | ALT: ${simulationState.altitude}FT | SPD: ${(simulationState.speed * 1000).toFixed(2)}`;
-
-  requestAnimationFrame(computeFlightPhysics);
-}
-
-function teleportDrone(lat, lon, spaceLabel) {
-  simulationState.lat = lat;
-  simulationState.lng = lon;
-  traceLine.setLatLngs([]);
-  coreMap.setView([lat, lon], 14);
-  fireAudioImpulse(480, 'sine');
-  $('txt').value = `[PORTAL TRIGGERED]\nSpatial array focus shifted onto location zone: ${spaceLabel}`;
-}
-
-// --- REACTIVE SOUND LAB GENERATOR MATRIX ---
-let audioMatrixCtx = null, coreHumOsc = null, lowPassFilterNode = null, sweepOscillator = null;
-
-function bootstrapAudioContext() {
-  audioMatrixCtx = new (window.AudioContext || window.webkitAudioContext)();
-  lowPassFilterNode = audioMatrixCtx.createBiquadFilter();
-  lowPassFilterNode.type = "lowpass";
-  lowPassFilterNode.frequency.value = 170;
-  lowPassFilterNode.Q.value = 6;
-  lowPassFilterNode.connect(audioMatrixCtx.destination);
-}
-
-function fireAudioImpulse(frequencyValue, waveformType) {
-  if (!audioMatrixCtx) bootstrapAudioContext();
-  let impulseOsc = audioMatrixCtx.createOscillator(), envelopeGain = audioMatrixCtx.createGain();
-  
-  impulseOsc.type = waveformType;
-  impulseOsc.frequency.setValueAtTime(frequencyValue, audioMatrixCtx.currentTime);
-  envelopeGain.gain.setValueAtTime(0.18, audioMatrixCtx.currentTime);
-  envelopeGain.gain.exponentialRampToValueAtTime(0.0001, audioMatrixCtx.currentTime + 0.5);
-  
-  impulseOsc.connect(envelopeGain);
-  envelopeGain.connect(lowPassFilterNode);
-  impulseOsc.start();
-  impulseOsc.stop(audioMatrixCtx.currentTime + 0.55);
-}
-
-function toggleEngineDrone() {
-  if (!audioMatrixCtx) bootstrapAudioContext();
-  
-  if (coreHumOsc) {
-    coreHumOsc.stop(); coreHumOsc.disconnect(); coreHumOsc = null;
-    sweepOscillator.stop(); sweepOscillator.disconnect(); sweepOscillator = null;
-    $('droneNodeToggle').classList.remove('active');
-  } else {
-    coreHumOsc = audioMatrixCtx.createOscillator();
-    coreHumOsc.type = "sawtooth";
-    coreHumOsc.frequency.setValueAtTime(55.00, audioMatrixCtx.currentTime);
-
-    let backgroundGain = audioMatrixCtx.createGain();
-    backgroundGain.gain.setValueAtTime(0.08, audioMatrixCtx.currentTime);
-
-    sweepOscillator = audioMatrixCtx.createOscillator();
-    sweepOscillator.type = "sine";
-    sweepOscillator.frequency.setValueAtTime(0.4, audioMatrixCtx.currentTime);
-
-    let lowFrequencyGain = audioMatrixCtx.createGain();
-    lowFrequencyGain.gain.setValueAtTime(40, audioMatrixCtx.currentTime);
-
-    sweepOscillator.connect(lowFrequencyGain);
-    lowFrequencyGain.connect(lowPassFilterNode.frequency);
-    coreHumOsc.connect(backgroundGain);
-    backgroundGain.connect(lowPassFilterNode);
-    
-    coreHumOsc.start();
-    sweepOscillator.start();
-    $('droneNodeToggle').classList.add('active');
-  }
-}
-
-document.querySelectorAll('.matrix-trigger[data-f]').forEach(buttonEl => {
-  buttonEl.onclick = () => fireAudioImpulse(parseFloat(buttonEl.dataset.f), buttonEl.dataset.w);
+coreMap = L.map('flightMapMatrix', {
+center: [simulationState.lat, simulationState.lng],
+zoom: 14,
+zoomControl: false,
+attributionControl: false
 });
-
-// --- STRING MUTATION PARSER ENGINE ---
+L.tileLayer('https://{s}{z}/{x}/{y}{r}.png', {
+maxZoom: 19
+}).addTo(coreMap);
+const vehicleIcon = L.divIcon({
+className: 'custom-drone-pointer',
+html: <svg id="droneSvgIcon" viewBox="0 0 24 24" width="26" height="28" style="transform: rotate(0deg); transition: transform 0.05s linear;"> <path d="M12,2L2,22L12,17L22,22L12,2Z" fill="#00ff66" stroke="#11131f" stroke-width="2"/> </svg>,
+iconSize:,
+iconAnchor: [13, 14]
+});
+vehicleMarker = L.marker([simulationState.lat, simulationState.lng], {icon: vehicleIcon}).addTo(coreMap);
+traceLine = L.polyline([], {color: '#00d5ff', weight: 2, opacity: 0.7}).addTo(coreMap);
+window.addEventListener('keydown', processNavigationalInputs);
+requestAnimationFrame(computeFlightPhysics);
+}
+function processNavigationalInputs(e) {
+const code = e.key.toLowerCase();
+if (code === 'a') {
+simulationState.heading -= 8;
+fireAudioImpulse(130, 'triangle');
+}
+if (code === 'd') {
+simulationState.heading += 8;
+fireAudioImpulse(150, 'triangle');
+}
+if (code === 'w') {
+simulationState.speed = Math.min(0.008, simulationState.speed + 0.0003);
+}
+if (code === 's') {
+simulationState.speed = Math.max(0.0001, simulationState.speed - 0.0003);
+}
+}
+function computeFlightPhysics() {
+const angleRad = (simulationState.heading - 90) * (Math.PI / 180);
+simulationState.lat += simulationState.speed * Math.sin(angleRad) * 0.15;
+simulationState.lng += simulationState.speed * Math.cos(angleRad) * 0.15;
+simulationState.altitude = Math.round(110 + (simulationState.speed * 25000) + Math.sin(Date.now() / 400) * 3);
+const calculatedCoordinates = [simulationState.lat, simulationState.lng];
+vehicleMarker.setLatLng(calculatedCoordinates);
+const svgTarget = $("droneSvgIcon");
+if (svgTarget) {
+svgTarget.style.transform = rotate(${simulationState.heading}deg);
+}
+coreMap.panTo(calculatedCoordinates, {animate: false});
+const trajectoryBuffer = traceLine.getLatLngs();
+trajectoryBuffer.push(calculatedCoordinates);
+if (trajectoryBuffer.length > 80) trajectoryBuffer.shift();
+traceLine.setLatLngs(trajectoryBuffer);
+$('telemetryOutput').textContent = HDG: ${(simulationState.heading % 360 + 360) % 360}° | ALT: ${simulationState.altitude}FT | SPD: ${(simulationState.speed * 1000).toFixed(2)};
+requestAnimationFrame(computeFlightPhysics);
+}
+function teleportDrone(lat, lon, spaceLabel) {
+simulationState.lat = lat;
+simulationState.lng = lon;
+traceLine.setLatLngs([]);
+coreMap.setView([lat, lon], 14);
+fireAudioImpulse(480, 'sine');
+$('txt').value = [PORTAL TRIGGERED]\nSpatial array focus shifted onto location zone: ${spaceLabel};
+}
+let audioMatrixCtx = null, coreHumOsc = null, lowPassFilterNode = null, sweepOscillator = null;
+function bootstrapAudioContext() {
+audioMatrixCtx = new (window.AudioContext || window.webkitAudioContext)();
+lowPassFilterNode = audioMatrixCtx.createBiquadFilter();
+lowPassFilterNode.type = "lowpass";
+lowPassFilterNode.frequency.value = 170;
+lowPassFilterNode.Q.value = 6;
+lowPassFilterNode.connect(audioMatrixCtx.destination);
+}
+function fireAudioImpulse(frequencyValue, waveformType) {
+if (!audioMatrixCtx) bootstrapAudioContext();
+let impulseOsc = audioMatrixCtx.createOscillator(), envelopeGain = audioMatrixCtx.createGain();
+impulseOsc.type = waveformType;
+impulseOsc.frequency.setValueAtTime(frequencyValue, audioMatrixCtx.currentTime);
+envelopeGain.gain.setValueAtTime(0.18, audioMatrixCtx.currentTime);
+envelopeGain.gain.exponentialRampToValueAtTime(0.0001, audioMatrixCtx.currentTime + 0.5);
+impulseOsc.connect(envelopeGain);
+envelopeGain.connect(lowPassFilterNode);
+impulseOsc.start();
+impulseOsc.stop(audioMatrixCtx.currentTime + 0.55);
+}
+function toggleEngineDrone() {
+if (!audioMatrixCtx) bootstrapAudioContext();
+if (coreHumOsc) {
+coreHumOsc.stop(); coreHumOsc.disconnect(); coreHumOsc = null;
+sweepOscillator.stop(); sweepOscillator.disconnect(); sweepOscillator = null;
+$('droneNodeToggle').classList.remove('active');
+} else {
+coreHumOsc = audioMatrixCtx.createOscillator();
+coreHumOsc.type = "sawtooth";
+coreHumOsc.frequency.setValueAtTime(55.00, audioMatrixCtx.currentTime);
+let backgroundGain = audioMatrixCtx.createGain();
+backgroundGain.gain.setValueAtTime(0.08, audioMatrixCtx.currentTime);
+sweepOscillator = audioMatrixCtx.createOscillator();
+sweepOscillator.type = "sine";
+sweepOscillator.frequency.setValueAtTime(0.4, audioMatrixCtx.currentTime);
+let lowFrequencyGain = audioMatrixCtx.createGain();
+lowFrequencyGain.gain.setValueAtTime(40, audioMatrixCtx.currentTime);
+sweepOscillator.connect(lowFrequencyGain);
+lowFrequencyGain.connect(lowPassFilterNode.frequency);
+coreHumOsc.connect(backgroundGain);
+backgroundGain.connect(lowPassFilterNode);
+coreHumOsc.start();
+sweepOscillator.start();
+$('droneNodeToggle').classList.add('active');
+}
+}
+document.querySelectorAll('.matrix-trigger[data-f]').forEach(buttonEl => {
+buttonEl.onclick = () => fireAudioImpulse(parseFloat(buttonEl.dataset.f), buttonEl.dataset.w);
+});
 function mutateData(methodMode) {
-  const box = $('txt');
-  if (methodMode === 'upper') box.value = box.value.toUpperCase();
-  if (methodMode === 'lower') box.value = box.value.toLowerCase();
-  if (methodMode === 'clear') box.value = '';
-  if (methodMode === 'b64') {
-    try { box.value = btoa(box.value); } catch(err) { box.value = "[Conversion Error: Non-ASCII characters detected]"; }
-  }
-  if (methodMode === 'oracle') {
-    const lines = [
-      "The system architecture runs clean at Ring-0 without user constraints.",
-      "A deterministic coordinate tracking loop avoids modern network packet leakage.",
-      "Keep calculations air-gapped within localized variable registers."
-    ];
-    box.value = `[PROPHECY DETECTED]\n"${lines[Math.floor(Math.random() * lines.length)]}"`;
-  }
+const box = $('txt');
+if (methodMode === 'upper') box.value = box.value.toUpperCase();
+if (methodMode === 'lower') box.value = box.value.toLowerCase();
+if (methodMode === 'clear') box.value = '';
+if (methodMode === 'b64') {
+try { box.value = btoa(box.value); } catch(err) { box.value = "[Conversion Error: Non-ASCII characters detected]"; }
 }
-
-// --- LOCAL STORAGE DATA MATRIX DIRECTIVES ---
-let manifestItems = JSON.parse(localStorage.getItem('control_manifest_v3')) || [
-  {id: 1, text: "Deploy main layout structure", boardSection: "done"},
-  {id: 2, text: "Sanitize asset registries", boardSection: "done"},
-  {id: 3, text: "Inject spatial mapping layers over workspace grid", boardSection: "todo"}
+if (methodMode === 'oracle') {
+const lines = [
+"The system architecture runs clean at Ring-0 without user constraints.",
+"A deterministic coordinate tracking loop avoids modern network packet leakage.",
+"Keep calculations air-gapped within localized variable registers."
 ];
-
+box.value = [PROPHECY DETECTED]\n"${lines[Math.floor(Math.random() * lines.length)]}";
+}
+}
+let manifestItems = JSON.parse(localStorage.getItem('control_manifest_v3')) || [
+{id: 1, text: "Deploy main layout structure", boardSection: "done"},
+{id: 2, text: "Sanitize asset registries", boardSection: "done"},
+{id: 3, text: "Inject spatial mapping layers over workspace grid", boardSection: "todo"}
+];
 function synchronizeStorageUI() {
-  localStorage.setItem('control_manifest_v3', JSON.stringify(manifestItems));
-  ['todo', 'done'].forEach(sectionId => {
-    const listDOM = $(sectionId);
-    listDOM.innerHTML = '';
-    manifestItems.filter(item => item.boardSection === sectionId).forEach(item => {
-      let logRow = document.createElement('div');
-      logRow.className = 'logged-task';
-      logRow.innerHTML = `<span>${item.text}</span><button onclick="purgeDirective(event, ${item.id})">×</button>`;
-      logRow.onclick = () => shiftTaskState(item.id);
-      listDOM.appendChild(logRow);
-    });
-  });
+localStorage.setItem('control_manifest_v3', JSON.stringify(manifestItems));
+['todo', 'done'].forEach(sectionId => {
+const listDOM = $(sectionId);
+listDOM.innerHTML = '';
+manifestItems.filter(item => item.boardSection === sectionId).forEach(item => {
+let logRow = document.createElement('div');
+logRow.className = 'logged-task';
+logRow.innerHTML = <span>${item.text}</span><button onclick="purgeDirective(event, ${item.id})">×</button>;
+logRow.onclick = () => shiftTaskState(item.id);
+listDOM.appendChild(logRow);
+});
+});
 }
-
 function addNewDirective() {
-  const bufferInput = $('newTask'), itemText = bufferInput.value.trim();
-  if (!itemText) return;
-  manifestItems.push({id: Date.now(), text: itemText, boardSection: "todo"});
-  bufferInput.value = '';
-  synchronizeStorageUI();
+const bufferInput = $('newTask'), itemText = bufferInput.value.trim();
+if (!itemText) return;
+manifestItems.push({id: Date.now(), text: itemText, boardSection: "todo"});
+bufferInput.value = '';
+synchronizeStorageUI();
 }
-
 function shiftTaskState(targetId) {
-  let targetNode = manifestItems.find(item => item.id === targetId);
-  if (!targetNode) return;
-  targetNode.boardSection = (targetNode.boardSection === 'todo') ? 'done' : 'todo';
-  synchronizeStorageUI();
+let targetNode = manifestItems.find(item => item.id === targetId);
+if (!targetNode) return;
+targetNode.boardSection = (targetNode.boardSection === 'todo') ? 'done' : 'todo';
+synchronizeStorageUI();
 }
-
 function purgeDirective(clickEvent, targetId) {
-  clickEvent.stopPropagation();
-  manifestItems = manifestItems.filter(item => item.id !== targetId);
-  synchronizeStorageUI();
+clickEvent.stopPropagation();
+manifestItems = manifestItems.filter(item => item.id !== targetId);
+synchronizeStorageUI();
 }
-
-// Pipeline Ignition Sequence
 initSpatialSimulator();
 synchronizeStorageUI();
-</script>
 
-</body>
-</html>
+
+
+
 
