@@ -216,4 +216,170 @@ function processNavigationalInputs(e) {
     fireAudioImpulse(130, 'triangle'); // Left tracking pulse
   }
   if (code === 'd') {
-Use code with caution.simulationState.heading += 8;fireAudioImpulse(150, 'triangle'); // Right tracking pulse}if (code === 'w') {simulationState.speed = Math.min(0.008, simulationState.speed + 0.0003);}if (code === 's') {simulationState.speed = Math.max(0.0001, simulationState.speed - 0.0003);}}function computeFlightPhysics() {// Convert standard navigational compass angle coordinates to cartesian tracksconst angleRad = (simulationState.heading - 90) * (Math.PI / 180);simulationState.lat += simulationState.speed * Math.sin(angleRad) * 0.15;simulationState.lng += simulationState.speed * Math.cos(angleRad) * 0.15;// Modulate altitude variables relative to active forward engine power indicessimulationState.altitude = Math.round(110 + (simulationState.speed * 25000) + Math.sin(Date.now() / 400) * 3);const calculatedCoordinates = [simulationState.lat, simulationState.lng];vehicleMarker.setLatLng(calculatedCoordinates);// Drive immediate rotation changes directly into DOM vector element handlesconst svgTarget = $("droneSvgIcon");if (svgTarget) {svgTarget.style.transform = rotate(${simulationState.heading}deg);}// Force map center alignment to pan synchronously behind tracking tokencoreMap.panTo(calculatedCoordinates, {animate: false});// Push updated navigation coordinates onto historical matrix trace trailconst trajectoryBuffer = traceLine.getLatLngs();trajectoryBuffer.push(calculatedCoordinates);if (trajectoryBuffer.length > 80) trajectoryBuffer.shift(); // Evict ancient arraystraceLine.setLatLngs(trajectoryBuffer);// Output calculations out to telemetry string layout lines$('telemetryOutput').textContent = HDG: ${(simulationState.heading % 360 + 360) % 360}° | ALT: ${simulationState.altitude}FT | SPD: ${(simulationState.speed * 1000).toFixed(2)};requestAnimationFrame(computeFlightPhysics);}function teleportDrone(lat, lon, spaceLabel) {simulationState.lat = lat;simulationState.lng = lon;traceLine.setLatLngs([]); // Empty existing historical array bufferscoreMap.setView([lat, lon], 14);fireAudioImpulse(480, 'sine');$('txt').value = [PORTAL TRIGGERED]\nSpatial array focus shifted onto location zone: ${spaceLabel};}// --- REACTIVE SOUND LAB GENERATOR MATRIX ---let audioMatrixCtx = null, coreHumOsc = null, lowPassFilterNode = null, sweepOscillator = null;function bootstrapAudioContext() {audioMatrixCtx = new (window.AudioContext || window.webkitAudioContext)();lowPassFilterNode = audioMatrixCtx.createBiquadFilter();lowPassFilterNode.type = "lowpass";lowPassFilterNode.frequency.value = 170;lowPassFilterNode.Q.value = 6;lowPassFilterNode.connect(audioMatrixCtx.destination);}function fireAudioImpulse(frequencyValue, waveformType) {if (!audioMatrixCtx) bootstrapAudioContext();let impulseOsc = audioMatrixCtx.createOscillator(), envelopeGain = audioMatrixCtx.createGain();impulseOsc.type = waveformType;impulseOsc.frequency.setValueAtTime(frequencyValue, audioMatrixCtx.currentTime);envelopeGain.gain.setValueAtTime(0.18, audioMatrixCtx.currentTime);envelopeGain.gain.exponentialRampToValueAtTime(0.0001, audioMatrixCtx.currentTime + 0.5);impulseOsc.connect(envelopeGain);envelopeGain.connect(lowPassFilterNode);impulseOsc.start();impulseOsc.stop(audioMatrixCtx.currentTime + 0.55);}function toggleEngineDrone() {if (!audioMatrixCtx) bootstrapAudioContext();if (coreHumOsc) {coreHumOsc.stop(); coreHumOsc.disconnect(); coreHumOsc = null;sweepOscillator.stop(); sweepOscillator.disconnect(); sweepOscillator = null;$('droneNodeToggle').classList.remove('active');} else {coreHumOsc = audioMatrixCtx.createOscillator();coreHumOsc.type = "sawtooth";coreHumOsc.frequency.setValueAtTime(55.00, audioMatrixCtx.currentTime);let backgroundGain = audioMatrixCtx.createGain();backgroundGain.gain.setValueAtTime(0.08, audioMatrixCtx.currentTime);sweepOscillator = audioMatrixCtx.createOscillator();sweepOscillator.type = "sine";sweepOscillator.frequency.setValueAtTime(0.4, audioMatrixCtx.currentTime);let lowFrequencyGain = audioMatrixCtx.createGain();lowFrequencyGain.gain.setValueAtTime(40, audioMatrixCtx.currentTime);sweepOscillator.connect(lowFrequencyGain);lowFrequencyGain.connect(lowPassFilterNode.frequency);coreHumOsc.connect(backgroundGain);backgroundGain.connect(lowPassFilterNode);coreHumOsc.start();sweepOscillator.start();$('droneNodeToggle').classList.add('active');}}document.querySelectorAll('.matrix-trigger[data-f]').forEach(buttonEl => {buttonEl.onclick = () => fireAudioImpulse(parseFloat(buttonEl.dataset.f), buttonEl.dataset.w);});// --- STRING MUTATION PARSER ENGINE ---function mutateData(methodMode) {const box = $('txt');if (methodMode === 'upper') box.value = box.value.toUpperCase();if (methodMode === 'lower') box.value = box.value.toLowerCase();if (methodMode === 'clear') box.value = '';if (methodMode === 'b64') {try { box.value = btoa(box.value); } catch(err) { box.value = "[Conversion Error: Non-ASCII characters detected]"; }}if (methodMode === 'oracle') {const lines = ["The system architecture runs clean at Ring-0 without user constraints.","A deterministic coordinate tracking loop avoids modern network packet leakage.","Keep calculations air-gapped within localized variable registers."];box.value = [PROPHECY DETECTED]\n"${lines[Math.floor(Math.random() * lines.length)]}";}}// --- LOCAL STORAGE DATA MATRIX DIRECTIVES ---let manifestItems = JSON.parse(localStorage.getItem('control_manifest_v3')) || [{id: 1, text: "Deploy main layout structure", boardSection: "done"},{id: 2, text: "Sanitize asset registries", boardSection: "done"},{id: 3, text: "Inject spatial mapping layers over workspace grid", boardSection: "todo"}];function synchronizeStorageUI() {localStorage.setItem('control_manifest_v3', JSON.stringify(manifestItems));['todo', 'done'].forEach(sectionId => {const listDOM = $(sectionId);listDOM.innerHTML = '';manifestItems.filter(item => item.boardSection === sectionId).forEach(item => {let logRow = document.createElement('div');logRow.className = 'logged-task';logRow.innerHTML = <span>${item.text}</span><button onclick="purgeDirective(event, ${item.id})">×</button>;logRow.onclick = () => shiftTaskState(item.id);listDOM.appendChild(logRow);});});}function addNewDirective() {const bufferInput = $('newTask'), itemText = bufferInput.value.trim();if (!itemText) return;manifestItems.push({id: Date.now(), text: itemText, boardSection: "todo"});bufferInput.value = '';synchronizeStorageUI();}function shiftTaskState(targetId) {let targetNode = manifestItems.find(item => item.id === targetId);if (!targetNode) return;targetNode.boardSection = (targetNode.boardSection === 'todo') ? 'done' : 'todo';synchronizeStorageUI();}function purgeDirective(clickEvent, targetId) {clickEvent.stopPropagation();manifestItems = manifestItems.filter(item => item.id !== targetId);synchronizeStorageUI();}// Pipeline Ignition SequenceinitSpatialSimulator();synchronizeStorageUI();
+  simulationState.lng += simulationState.speed * Math.cos(angleRad) * 0.15;
+
+  simulationState.altitude = Math.round(110 + (simulationState.speed * 25000) + Math.sin(Date.now() / 400) * 3);
+
+  const calculatedCoordinates = [simulationState.lat, simulationState.lng];
+  vehicleMarker.setLatLng(calculatedCoordinates);
+
+  const svgTarget = $("droneSvgIcon");
+  if (svgTarget) {
+    svgTarget.style.transform = `rotate(${simulationState.heading}deg)`;
+  }
+
+  coreMap.panTo(calculatedCoordinates, {animate: false});
+
+  const trajectoryBuffer = traceLine.getLatLngs();
+  trajectoryBuffer.push(calculatedCoordinates);
+  if (trajectoryBuffer.length > 80) trajectoryBuffer.shift();
+  traceLine.setLatLngs(trajectoryBuffer);
+
+  $('telemetryOutput').textContent = `HDG: ${(simulationState.heading % 360 + 360) % 360}° | ALT: ${simulationState.altitude}FT | SPD: ${(simulationState.speed * 1000).toFixed(2)}`;
+
+  requestAnimationFrame(computeFlightPhysics);
+}
+
+function teleportDrone(lat, lon, spaceLabel) {
+  simulationState.lat = lat;
+  simulationState.lng = lon;
+  traceLine.setLatLngs([]);
+  coreMap.setView([lat, lon], 14);
+  fireAudioImpulse(480, 'sine');
+  $('txt').value = `[PORTAL TRIGGERED]\nSpatial array focus shifted onto location zone: ${spaceLabel}`;
+}
+
+// --- REACTIVE SOUND LAB GENERATOR MATRIX ---
+let audioMatrixCtx = null, coreHumOsc = null, lowPassFilterNode = null, sweepOscillator = null;
+
+function bootstrapAudioContext() {
+  audioMatrixCtx = new (window.AudioContext || window.webkitAudioContext)();
+  lowPassFilterNode = audioMatrixCtx.createBiquadFilter();
+  lowPassFilterNode.type = "lowpass";
+  lowPassFilterNode.frequency.value = 170;
+  lowPassFilterNode.Q.value = 6;
+  lowPassFilterNode.connect(audioMatrixCtx.destination);
+}
+
+function fireAudioImpulse(frequencyValue, waveformType) {
+  if (!audioMatrixCtx) bootstrapAudioContext();
+  let impulseOsc = audioMatrixCtx.createOscillator(), envelopeGain = audioMatrixCtx.createGain();
+  
+  impulseOsc.type = waveformType;
+  impulseOsc.frequency.setValueAtTime(frequencyValue, audioMatrixCtx.currentTime);
+  envelopeGain.gain.setValueAtTime(0.18, audioMatrixCtx.currentTime);
+  envelopeGain.gain.exponentialRampToValueAtTime(0.0001, audioMatrixCtx.currentTime + 0.5);
+  
+  impulseOsc.connect(envelopeGain);
+  envelopeGain.connect(lowPassFilterNode);
+  impulseOsc.start();
+  impulseOsc.stop(audioMatrixCtx.currentTime + 0.55);
+}
+
+function toggleEngineDrone() {
+  if (!audioMatrixCtx) bootstrapAudioContext();
+  
+  if (coreHumOsc) {
+    coreHumOsc.stop(); coreHumOsc.disconnect(); coreHumOsc = null;
+    sweepOscillator.stop(); sweepOscillator.disconnect(); sweepOscillator = null;
+    $('droneNodeToggle').classList.remove('active');
+  } else {
+    coreHumOsc = audioMatrixCtx.createOscillator();
+    coreHumOsc.type = "sawtooth";
+    coreHumOsc.frequency.setValueAtTime(55.00, audioMatrixCtx.currentTime);
+
+    let backgroundGain = audioMatrixCtx.createGain();
+    backgroundGain.gain.setValueAtTime(0.08, audioMatrixCtx.currentTime);
+
+    sweepOscillator = audioMatrixCtx.createOscillator();
+    sweepOscillator.type = "sine";
+    sweepOscillator.frequency.setValueAtTime(0.4, audioMatrixCtx.currentTime);
+
+    let lowFrequencyGain = audioMatrixCtx.createGain();
+    lowFrequencyGain.gain.setValueAtTime(40, audioMatrixCtx.currentTime);
+
+    sweepOscillator.connect(lowFrequencyGain);
+    lowFrequencyGain.connect(lowPassFilterNode.frequency);
+    coreHumOsc.connect(backgroundGain);
+    backgroundGain.connect(lowPassFilterNode);
+    
+    coreHumOsc.start();
+    sweepOscillator.start();
+    $('droneNodeToggle').classList.add('active');
+  }
+}
+
+document.querySelectorAll('.matrix-trigger[data-f]').forEach(buttonEl => {
+  buttonEl.onclick = () => fireAudioImpulse(parseFloat(buttonEl.dataset.f), buttonEl.dataset.w);
+});
+
+// --- STRING MUTATION PARSER ENGINE ---
+function mutateData(methodMode) {
+  const box = $('txt');
+  if (methodMode === 'upper') box.value = box.value.toUpperCase();
+  if (methodMode === 'lower') box.value = box.value.toLowerCase();
+  if (methodMode === 'clear') box.value = '';
+  if (methodMode === 'b64') {
+    try { box.value = btoa(box.value); } catch(err) { box.value = "[Conversion Error: Non-ASCII characters detected]"; }
+  }
+  if (methodMode === 'oracle') {
+    const lines = [
+      "The system architecture runs clean at Ring-0 without user constraints.",
+      "A deterministic coordinate tracking loop avoids modern network packet leakage.",
+      "Keep calculations air-gapped within localized variable registers."
+    ];
+    box.value = `[PROPHECY DETECTED]\n"${lines[Math.floor(Math.random() * lines.length)]}"`;
+  }
+}
+
+// --- LOCAL STORAGE DATA MATRIX DIRECTIVES ---
+let manifestItems = JSON.parse(localStorage.getItem('control_manifest_v3')) || [
+  {id: 1, text: "Deploy main layout structure", boardSection: "done"},
+  {id: 2, text: "Sanitize asset registries", boardSection: "done"},
+  {id: 3, text: "Inject spatial mapping layers over workspace grid", boardSection: "todo"}
+];
+
+function synchronizeStorageUI() {
+  localStorage.setItem('control_manifest_v3', JSON.stringify(manifestItems));
+  ['todo', 'done'].forEach(sectionId => {
+    const listDOM = $(sectionId);
+    listDOM.innerHTML = '';
+    manifestItems.filter(item => item.boardSection === sectionId).forEach(item => {
+      let logRow = document.createElement('div');
+      logRow.className = 'logged-task';
+      logRow.innerHTML = `<span>${item.text}</span><button onclick="purgeDirective(event, ${item.id})">×</button>`;
+      logRow.onclick = () => shiftTaskState(item.id);
+      listDOM.appendChild(logRow);
+    });
+  });
+}
+
+function addNewDirective() {
+  const bufferInput = $('newTask'), itemText = bufferInput.value.trim();
+  if (!itemText) return;
+  manifestItems.push({id: Date.now(), text: itemText, boardSection: "todo"});
+  bufferInput.value = '';
+  synchronizeStorageUI();
+}
+
+function shiftTaskState(targetId) {
+  let targetNode = manifestItems.find(item => item.id === targetId);
+  if (!targetNode) return;
+  targetNode.boardSection = (targetNode.boardSection === 'todo') ? 'done' : 'todo';
+  synchronizeStorageUI();
+}
+
+function purgeDirective(clickEvent, targetId) {
+  clickEvent.stopPropagation();
+  manifestItems = manifestItems.filter(item => item.id !== targetId);
+  synchronizeStorageUI();
+}
+
+// Pipeline Ignition Sequence
+initSpatialSimulator();
+synchronizeStorageUI();
+</script>
+
+</body>
+</html>
+
